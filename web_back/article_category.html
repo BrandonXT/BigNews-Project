@@ -72,7 +72,8 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success addCss" data-toggle="modal"
+                                data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -90,6 +91,8 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <!-- 增加id -->
+                        <input type="hidden" name="id" class="id" >
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
                             <input type="text" class="form-control" id="recipient-name">
@@ -115,18 +118,16 @@
         });
 
         $('#model_shutoff').click(function () {
-            alert('shutoff');
             $('#addModal').modal('hide');
         });
 
         $('#model_add').click(function () {
-            alert('add');
             $('#addModal').modal('hide');
         });
 
         $('.category_table').delegate('a', 'click', function () {
             if ($(this).hasClass('btn-info')) {
-                $('#addModal .modal-title').html('修改分类名称');
+                $('#addModal .modal-title').html('修改分类');
                 $('#addModal').modal('show');
             }
         })
@@ -140,8 +141,7 @@
             <td>{{v.name}}</td>
             <td>{{v.slug}}</td>
             <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;{{v.id}}&quot;,&quot;slug&quot;:&quot;{{v.slug}}&quot;,&quot;name&quot;:&quot;{{v.name}}&quot;});"
-                    class="btn btn-info btn-xs">编辑</a>
+                <a href="#" thisId="{{v.id}}" class="btn btn-info btn-xs btn-edit">编辑</a>
                 <a href="#" thisId="{{v.id}}" class="btn btn-danger btn-xs">删除</a>
             </td>
         </tr>
@@ -160,6 +160,7 @@
             </td>
         </tr>
     </script>
+
     <script>
         $(function () {
             function getData() {
@@ -177,41 +178,66 @@
             //进入页面加载全部数据
             getData();
 
-            //设置添加点击事件
-            $('#model_add').on('click', function () {
-                //获取模态框值
-                let newname = $('#recipient-name').val().trim();
-                let newslug = $('#recipient-slug').val().trim();
-                //发送请求
-                $.ajax({
-                    type: 'post',
-                    url: "http://localhost:8000/admin/category_add",
-                    data: {
-                        name: newname,
-                        slug: newslug
-                    },
-                    success: (res) => {
-                        console.log(res);
-                        //可以刷新界面（数据很大的时候用户体验不好）
-                        getData();
-                        // 可以直接刷新页面
-                        // location.onload()
+            //设置添加/编辑点击事件
+            $('#model_add').on('click', function (e) {
+                e.preventDefault();
+                if ($(this).hasClass('btn-success')) {
+                    //编辑
+                    let editname = $('#recipient-name').val();
+                    let editslug = $('#recipient-slug').val();
+                    let id = $('.modal-body .id').val();
+                    // console.log(id);
+                    
+                    $.post({
+                        url:'http://localhost:8000/admin/category_edit',
+                        data:{
+                            id:id,
+                            name:editname,
+                            slug:editslug
+                        },
+                        success:function(backData){
+                          alert('修改成功');
+                          getData();
+                        }
+                    });
 
-                        //在页面添加一条
-                        // let newtr = template('temp2',{name:newname,slug:newslug});
-                        // $('tbody').append(newtr);
-                    }
-                });
+                } else {
+                    //添加
+                    //获取模态框值
+                    let newname = $('#recipient-name').val().trim();
+                    let newslug = $('#recipient-slug').val().trim();
+                    //发送请求
+                    $.ajax({
+                        type: 'post',
+                        url: "http://localhost:8000/admin/category_add",
+                        data: {
+                            name: newname,
+                            slug: newslug
+                        },
+                        success: (res) => {
+                            console.log(res);
+                            //可以刷新界面（数据很大的时候用户体验不好）
+                            getData();
+                            // 可以直接刷新页面
+                            // location.onload()
+
+                            //在页面添加一条
+                            // let newtr = template('temp2',{name:newname,slug:newslug});
+                            // $('tbody').append(newtr);
+                        }
+                    });
+                }
                 $('#addModal').modal('hide');
-            })
+            });
+
+
 
             //设置删除点击事件
-            $('tbody').on('click', '.btn-danger', function (e) { //注意要在父盒子的tbody增加点击事件
+            $('tbody').on('click', '.btn-danger', function (e) { //注意要在父盒子的tbody增加点击事件zz
                 e.preventDefault();
                 if (confirm("是否删除？")) {
                     let that = this;
                     let nid = $(this).attr('thisId');
-                    // console.log(nid);
                     $.ajax({
                         type: 'post',
                         data: {
@@ -227,9 +253,29 @@
             });
 
 
+            //恢复添加事件的样式
+            $('.addCss').on('click', function () {
+                $('#model_add').text('添加').removClass('btn-success');
+            });
 
 
-            
+            //设置编辑点击事件
+            $('tbody').on('click', '.btn-edit', function () {
+                //修改模态框样式
+                $('#model_add').text('修改').addClass('btn-success');
+                //获取当前内容填充到input
+                let id = $(this).attr('thisId');
+                console.log(id);
+                // let name = $(this).parent().prev().prev().text();
+                let name = $(this).parent().parent().children('td:eq(0)').text();
+                let slug = $(this).parent().prev().text();
+                $('.modal-body .id').val(id);
+                $('#recipient-name').val(name);
+                $('#recipient-slug').val(slug);
+            });
+
+
+
         })
     </script>
 </body>
