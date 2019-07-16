@@ -33,13 +33,14 @@
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
+                        <img src="" alt="" style="height: 150px"><br>
                         <input type="file" id="exampleInputFile">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control article-cate">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -79,6 +80,36 @@
             </form>
         </div>
     </div>
+
+    <script src="./js/template-web.js"></script>
+    <script type="text/html" id="model1">
+        {{each data v}}
+            <option>{{v.name}}</option>
+        {{/each}}
+    </script>
+    <script>
+        $(function(){
+            //===================图片预览
+            $('#exampleInputFile').on('change',function(){
+                let iconFile = this.files[0];   //取得图片 **files方法是dom对象
+                let url = URL.createObjectURL(iconFile);  //设置一个临时路径
+                $(this).prev().prev().attr('src',url);
+            });
+
+            //============= 设置类别下拉菜单
+            $.ajax({
+                type:'get',
+                url:"http://localhost:8000/admin/category_search",
+                success:(res)=>{
+                    let resHtml = template('model1',res);
+                    $('.article-cate').html(resHtml);
+                }
+            });
+
+
+
+        });
+    </script>
 
 </body>
 
