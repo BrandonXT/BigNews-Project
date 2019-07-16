@@ -15,6 +15,8 @@
     <script src="js/jedate/js/jedate.js"></script>
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
+    <script src="./js/moment.js"></script>
+
 </head>
 
 <body>
@@ -27,20 +29,20 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" placeholder="文章标题">
+                        <input type="email" name="title" class="form-control" id="inputEmail3" placeholder="文章标题">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
                         <img src="" alt="" style="height: 150px"><br>
-                        <input type="file" id="exampleInputFile">
+                        <input type="file" name="cover" id="exampleInputFile">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control article-cate">
+                        <select name="type" class="form-control article-cate">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -54,7 +56,7 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="YYYY-MM-DD" id="dateinput">
+                            <input type="text" name="date" class="form-control" placeholder="YYYY-MM-DD" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -66,14 +68,13 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <textarea class="form-control" id="rich_content" name="content" placeholder="文章内容">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda fugiat illo nihil molestias ab. Laborum eius non atque, totam sapiente quae obcaecati assumenda ratione inventore pariatur maiores, qui libero delectus.
+                        <textarea class="form-control" id="rich_content"  placeholder="文章内容">
                             </textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">发布</button>
+                        <button type="submit" class="btn btn-success btn-release">发布</button>
                         <button type="submit" class="btn btn-default">存为草稿</button>
                     </div>
                 </div>
@@ -84,7 +85,7 @@
     <script src="./js/template-web.js"></script>
     <script type="text/html" id="model1">
         {{each data v}}
-            <option>{{v.name}}</option>
+            <option value='{{v.id}}'>{{v.name}}</option>
         {{/each}}
     </script>
     <script>
@@ -105,8 +106,32 @@
                     $('.article-cate').html(resHtml);
                 }
             });
+            //=============一进入就获取日期
+            let currentDate =moment().format('YYYY-MM-DD');
+            // console.log(currentDate);
+            $('#dateinput').val(currentDate);
 
+            //=================发布设置点击事件
+            $('.btn-release').on('click',function(){
+                let formData1= new FormData($('form')[0]);  //设置formdata对象
+                formData1.append('content',tinyMCE.activeEditor.getContent()); //获取文章内容
+                formData1.append('state','草稿');                          //追加state元素
+                
+                // 发送请求
+                $.ajax({
+                    type:'post',
+                    url:'http://localhost:8000/admin/article_publish',
+                    data:formData1,
+                    contentType:false,
+                    processData:false,
+                    success:(res)=>{
+                        if(res.code==201){
+                            alert('发布成功');
+                        }
+                    }
+                });
 
+            });
 
         });
     </script>
