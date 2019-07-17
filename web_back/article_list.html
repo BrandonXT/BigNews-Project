@@ -292,7 +292,7 @@
             <td class="text-center">{{v.state}}</td>
             <td class="text-center">
                 <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
-                <a href="#" thisId="{{v.id}}" class="btn btn-danger btn-xs">删除</a>
+                <a href="#" thisId="{{v.id}}" class="btn btn-danger btn-xs btn-delet">删除</a>
             </td>
         </tr>
         {{/each}}
@@ -331,10 +331,13 @@
                         let ttpage = res.totalPage;
                         // console.log(ttpage);
                         var totalPages = ttpage;
-                        //判断页码是否与当前页码相等
+
+                        window.currentPage = $pagination.twbsPagination('getCurrentPage');  //获取当前页，暴露到全局
+
+                        //判断页码是否与当前页码相等,不等就要重新刷新页面
                         if (totalPages != maxpage) {  //若页码不相等就要重新绘制页码条
                             maxpage = totalPages;  //将最大的页数刷新赋值
-                            var currentPage = $pagination.twbsPagination('getCurrentPage');
+                            var currentPage = $pagination.twbsPagination('getCurrentPage');  //获取当前页
                             $pagination.twbsPagination('destroy');
                             $pagination.twbsPagination($.extend({}, defaultOpts, {
                                 // startPage: currentPage,
@@ -347,7 +350,6 @@
             }
 
             let maxpage = 20;  //设置一个全局变量
-        
             //###绘制页码条
             var $pagination = $('.pagination');
             var defaultOpts = {
@@ -365,15 +367,30 @@
             $pagination.twbsPagination(defaultOpts);
 
 
-            // ###点击获取文章内容
+            // ###点击筛选获取文章内容
             $("#btnSearch").on('click', function (e) {
                 e.preventDefault();
+                //当页数相同时触发页码跳转
+                $('.page-link').trigger('click');
                 getData(1);
             });
-            // 进入页面自动触发
+            // ###进入页面自动触发
             $("#btnSearch").trigger('click');
 
+            // ###删除事件
+            $('tbody').on('click','.btn-delet',function(e){    //不能直接用id，要用事件继承
+                e.preventDefault();
+                let id = $(this).attr('thisId');
+                $.ajax({
+                    url:"http://localhost:8000/admin/article_delete",
+                    data:{id:id},
+                    success:(res)=>{
+                        console.log(res);
+                        getData(currentPage);
 
+                    }
+                });
+            });
 
 
 
