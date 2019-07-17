@@ -27,56 +27,115 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" value="文章标题文字">
+                        <input type="email" name="title" class="form-control article_title" id="inputEmail3" value="文章标题文字">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
                         <img src="images/pic06.jpg" class="article_cover">
-                        <input type="file" id="exampleInputFile">
+                        <input type="file" name="cover" id="exampleInputFile">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control article_type" name="type">
                             <option>类别一</option>
                             <option>类别二</option>
-                            <option>类别三</option>
-                            <option selected>类别四</option>
-                            <option>类别五</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">发布时间：</label>
                     <div class="col-sm-4">
-
                         <div class="input-group">
-                            <input type="text" class="form-control" value="2019-05-17" id="dateinput">
-                            <span class="input-group-btn">
+                            <input type="text" class="form-control " disabled value="2019-05-17" id="dateinput" name="date">
+                            <!-- <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
                                         class="iconfont icon-icondate"></i></button>
-                            </span>
+                            </span> -->
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="rich_content" name="content" placeholder="文章内容" value="文章内容">
+                        <input type="text" class="form-control" id="rich_content"  placeholder="文章内容" value="文章内容">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">修改</button>
+                        <button type="submit" class="btn btn-success btn-change">修改</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+
+    <script src="./js/template-web.js"></script>
+    <script type="text/html" id="model1">
+        {{each data v}}
+        <option value="{{v.id}}">{{v.name}}</option>
+        {{/each}}
+    </script>
+
+    <script>
+        $(function(){  //=================入口函数
+            //### 获取传入的id
+            let id = window.location.search.split('=')[1];
+
+            //### 填充类名
+            $.ajax({
+                url:"http://localhost:8000/admin/category_search",
+                success:(res)=>{
+                    let resHtml = template('model1',res);
+                    $('.article_type').html(resHtml);
+                }
+            });
+
+            //### 发送ajax根据id获取内容,并渲染进html
+            $.ajax({
+                url:"http://localhost:8000/admin/search",
+                data:{id:id},
+                success:(res)=>{
+                    console.log(res);
+                    //填充数据
+                    $(".article_title").val(res.data.title);
+                    $(".article_cover").attr('src',res.data.cover);
+                    $(".article_type").val(res.data.type);
+                    $("#dateinput").val(res.data.date);
+                    $("#rich_content").val(res.data.content);
+                }
+            });
+            
+            //###点击提交按钮发送Ajax请求
+            $('.btn-change').on('click',function(){
+                //###新建一个Form表单元素储存修改后的数据
+                let formData1 = new FormData($('form')[0]);
+                formData1.append('id',id); //添加id
+                formData1.append('content',tinyMCE.activeEditor.getContent()); //添加富文本内容
+                //发送ajax请求
+                $.ajax({
+                    type:'post',
+                    url:"http://localhost:8000/admin/article_edit",
+                    data:formData1,
+                    contentType:false,
+                    processData:false,
+                    success:(res)=>{
+                        console.log(res);
+                        alert('删除成功');
+                    }
+                });
+
+            });
+
+        });
+
+
+
+    </script>
 
 </body>
 

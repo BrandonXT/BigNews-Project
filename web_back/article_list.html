@@ -291,7 +291,7 @@
             <td class="text-center">{{v.date}}</td>
             <td class="text-center">{{v.state}}</td>
             <td class="text-center">
-                <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
+                <a href="article_edit.html?id={{v.id}}" class="btn btn-default btn-xs">编辑</a>
                 <a href="#" thisId="{{v.id}}" class="btn btn-danger btn-xs btn-delet">删除</a>
             </td>
         </tr>
@@ -336,7 +336,7 @@
 
                         //判断页码是否与当前页码相等,不等就要重新刷新页面
                         if (totalPages != maxpage) {  //若页码不相等就要重新绘制页码条
-                            maxpage = totalPages;  //将最大的页数刷新赋值
+                            maxpage = totalPages;  //将最大的页数刷新赋值，以便下次筛选判断
                             var currentPage = $pagination.twbsPagination('getCurrentPage');  //获取当前页
                             $pagination.twbsPagination('destroy');
                             $pagination.twbsPagination($.extend({}, defaultOpts, {
@@ -374,8 +374,9 @@
                 $('.page-link').trigger('click');
                 getData(1);
             });
+
             // ###进入页面自动触发
-            $("#btnSearch").trigger('click');
+            // $("#btnSearch").trigger('click');
 
             // ###删除事件
             $('tbody').on('click','.btn-delet',function(e){    //不能直接用id，要用事件继承
@@ -387,7 +388,6 @@
                     success:(res)=>{
                         console.log(res);
                         getData(currentPage);
-
                     }
                 });
             });
