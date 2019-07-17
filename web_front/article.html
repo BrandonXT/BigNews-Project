@@ -205,6 +205,30 @@
         <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
 
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <script>
+        $(function () {
+            //获取地址的id
+            let id = window.location.search.split('=')[1];
+            // console.log(id);
+
+            //发送请求
+            $.ajax({
+                url: 'http://localhost:8000/admin/search',
+                data: {
+                    id: id,
+                },
+                success: (res) => {
+                    // console.log(res);
+                    let newHtml = `${res.data.author} 发布于 ${res.data.date} &nbsp;&nbsp;&nbsp;分类: ${res.data.type}&nbsp;&nbsp;&nbsp;阅读:
+                ${res.data.read}&nbsp;&nbsp;&nbsp;评论:${res.data.comment}`;
+                    $('.article_info').html(newHtml);
+                    $('.article_con').html(res.data.content);
+                    $('.article_title').text(res.data.title);
+                }
+            });
+        })
+    </script>
 </body>
 
 </html>
